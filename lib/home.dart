@@ -11,10 +11,27 @@ class Home extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Home Page'),
         ),
-        body: const Center(
-          child: Text('¡Hola, estás autenticado!'),
-        ),
+        body: Container(
+          height: double.infinity,
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('¡Hola, estás autenticado!'),
+              ElevatedButton(
+                  onPressed: () async { _cerrarSesion; },
+                  child: const Text('Cerrar Sesi{on')
+              )
+            ],
+          ),
+        )
       ),
     );
+  }
+
+  void _cerrarSesion() {
+
   }
 }

@@ -1,12 +1,50 @@
+import 'package:dojo_flutter_firebase/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class Login extends StatelessWidget {
-  const Login({Key? key}) : super(key: key); // Es muy importante que en esta parte creemos la clase cómo Login e igual la clave
+class Login extends StatefulWidget {
+  const Login({Key? key}) : super(key: key);
+  @override
+  State<Login> createState() => _LoginState();
+}
 
+class _LoginState extends State<Login> {
+ // Es muy importante que en esta parte creemos la clase cómo Login e igual la clave
   final turquesaDark = const Color(0xff0e7c7b);
   final rosa = const Color(0xffef476f);
   final blanquito = const Color(0xfffffffa);
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _contrasenaController = TextEditingController();
+
+  String? _mensajeError = '';
+
+  Future<void> ingresar() async {
+    try {
+      await Auth().autenticarseConEmailYContrasena(
+          email: _emailController.text,
+          contrasena: _contrasenaController.text
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _mensajeError = e.message;
+      });
+    }
+  }
+
+  Future<void> crearUsuario() async {
+    try {
+      await Auth().crearUsuarioConEmailYContrasena(
+          email: _emailController.text,
+          contrasena: _contrasenaController.text
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _mensajeError = e.message;
+      });
+    }
+  }
 
   Widget cuerpo(context) {
     return SafeArea( // Le damos un SafeArea para que nada se nos desborde
@@ -25,22 +63,23 @@ class Login extends StatelessWidget {
 
   Widget formulario(context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.5,
       child: Form(
         child: Column( //Para que todo se nos agrege de forma vertical
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            textoIngresar('Ingresa tu Email', false), // Creamos de una vez la llamada a los demás widgets
-            textoIngresar( 'Ingresa tu contraseña', true),
+            textoIngresar('Ingresa tu Email', false, _emailController), // Creamos de una vez la llamada a los demás widgets
+            textoIngresar( 'Ingresa tu contraseña', true, _contrasenaController),
+            botonRegistrar(context),
             botonIngresar(context),
+            mensajeError()
           ],
         ),
       ),
     );
   }
 
-  Widget textoIngresar(texto, obscureText) {
+  Widget textoIngresar(texto, obscureText, controller) {
     return Container(
       width: Size.infinite.width,
       constraints: const BoxConstraints(maxWidth: 300),
@@ -53,7 +92,15 @@ class Login extends StatelessWidget {
             fillColor: Colors.white,
             filled: true),
         obscureText: obscureText, //Esto hace que aparezca ******
+        controller: controller,
       ),
+    );
+  }
+
+  Widget botonRegistrar(context) {
+    return ElevatedButton(
+        onPressed: _registrarUsuario,
+        child: const Text('Registrar')
     );
   }
 
@@ -69,10 +116,7 @@ class Login extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5.0),
         ),
-        onPressed: () async {
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('home', (route) => true);
-        },
+        onPressed: _autenticarUsuario,
         child: const Text(
           'Ingresar',
           style: TextStyle(
@@ -84,6 +128,9 @@ class Login extends StatelessWidget {
     );
   }
 
+  Widget mensajeError() {
+    return Text(_mensajeError!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,4 +141,12 @@ class Login extends StatelessWidget {
     );
   }
 
+  void _registrarUsuario() {
+
+  }
+
+  void _autenticarUsuario() {
+    Navigator.of(context)
+        .pushNamedAndRemoveUntil('home', (route) => true);
+  }
 }
